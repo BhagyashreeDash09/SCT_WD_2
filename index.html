@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stopwatch</title>
+    <title>Stopwatch Web Application</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="stopwatch-container">
-        <div class="stopwatch-header">Stopwatch</div>
-        <div class="stopwatch-display" id="display">00:00:00</div>
-        <div class="stopwatch-controls">
-            <button id="startButton" class="control-button start">Start</button>
-            <button id="pauseButton" class="control-button pause">Pause</button>
-<button id="resetButton" class="control-button reset">Reset</button>
-            <button id="lapButton" class="control-button lap">Lap</button>
+        <h1>Stopwatch</h1>
+        <div id="display" class="display">00:00:00</div>
+        <div class="controls">
+            <button id="startPauseBtn" class="btn start">Start</button>
+            <button id="lapBtn" class="btn lap" disabled>Lap</button>
+            <button id="resetBtn" class="btn reset" disabled>Reset</button>
         </div>
-        <div class="lap-times-container">
-            <ul id="lapList" class="lap-list"></ul>
+        <div id="lapTimes" class="lap-times">
+            <h2>Lap Times</h2>
+            <ul id="lapList">
+                </ul>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
+
