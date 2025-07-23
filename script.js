@@ -1,109 +1,77 @@
-let [hours, minutes, seconds] = [0, 0, 0];
-let display = document.getElementById("display");
-let timer = null;
+let startTime;
+let updatedTime;
+let difference;
+let tInterval;
+let running = false;
+let lapCounter = 0;
 
-function updateDisplay() {
-  let h = hours < 10 ? "0" + hours : hours;
-  let m = minutes < 10 ? "0" + minutes : minutes;
-  let s = seconds < 10 ? "0" + seconds : seconds;
-  display.innerText = `${h}:${m}:${s}`;
-}
+const display = document.getElementById('display');
+const startPauseBtn = document.getElementById('startPauseBtn');
+const lapBtn = document.getElementById('lapBtn');
+const resetBtn = document.getElementById('resetBtn');
+const lapList = document.getElementById('lapList');
 
-function stopwatch() {
-  seconds++;
-  if (seconds === 60) {
-    seconds = 0;
-    minutes++;
-  }
-  if (minutes === 60) {
-    minutes = 0;
-    hours++;
-  }
-  updateDisplay();
-}
+startPauseBtn.addEventListener('click', startPause);
+lapBtn.addEventListener('click', recordLap);
+resetBtn.addEventListener('click', resetStopwatch);
 
-document.getElementById("startBtn").addEventListener("click", () => {
-  if (timer !== null) return;
-  timer = setInterval(stopwatch, 1000);
-});
-
-document.getElementById("pauseBtn").addEventListener("click", () => {
-  clearInterval(timer);
-  timer = null;
-});
-
-document.getElementById("resetBtn").addEventListener("click", () => {
-  clearInterval(timer);
-  timer = null;
-  [hours, minutes, seconds] = [0, 0, 0];
-  updateDisplay();
-  document.getElementById("laps").innerHTML = "";
-});
-
-document.getElementById("lapBtn").addEventListener("click", () => {
-  const lapTime = display.innerText;
-  const li = document.createElement("li");
-  li.innerText = `Lap: ${lapTime}`;
-  document.getElementById("laps").appendChild(li);
-});
-
-function startStopwatch() {
+function startPause() {
     if (!running) {
-        startTime = Date.now() - elapsedTime;
-        timer = setInterval(updateDisplay, 10); // Update every 10ms for smoother milliseconds
-  running = true;
-        startButton.textContent = 'Running';
-        startButton.disabled = true;
-        pauseButton.disabled = false;
-        resetButton.disabled = false;
-        lapButton.disabled = false;
-    }
-}
-
-function pauseStopwatch() {
-    if (running) {
-        clearInterval(timer);
-        elapsedTime = Date.now() - startTime;
+        startTime = new Date().getTime() - (difference || 0);
+        tInterval = setInterval(getShowTime, 1); // Update every millisecond
+        startPauseBtn.innerHTML = 'Pause';
+        startPauseBtn.classList.remove('start');
+        startPauseBtn.classList.add('pause');
+        lapBtn.disabled = false;
+        resetBtn.disabled = false;
+        running = true;
+    } else {
+        clearInterval(tInterval);
+        startPauseBtn.innerHTML = 'Start';
+        startPauseBtn.classList.remove('pause');
+        startPauseBtn.classList.add('start');
         running = false;
-        startButton.textContent = 'Start';
-        startButton.disabled = false;
-        pauseButton.disabled = true;
     }
 }
-function resetStopwatch() {
-    clearInterval(timer);
-    running = false;
-    elapsedTime = 0;
-    lapTimes = [];
-    display.textContent = '00:00:00';
-    lapList.innerHTML = ''; // Clear lap list
-    startButton.textContent = 'Start';
-    startButton.disabled = false;
-    pauseButton.disabled = true;
-    resetButton.disabled = true;
-    lapButton.disabled = true;
+
+function getShowTime() {
+    updatedTime = new Date().getTime();
+    difference = updatedTime - startTime;
+
+    let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((difference % (1000 * 60)) / 1000);
+    let milliseconds = Math.floor((difference % 1000) / 10); // Displaying in centiseconds for readability
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+    milliseconds = (milliseconds < 10) ? "0" + milliseconds : milliseconds;
+
+    display.innerHTML = `${hours}:${minutes}:${seconds}`; // Displaying without milliseconds in main
 }
 
-function updateDisplay() {
-    elapsedTime = Date.now() - startTime;
-    display.textContent = formatTime(elapsedTime);
-}
 function recordLap() {
     if (running) {
-        const lapTime = elapsedTime;
-        lapTimes.push(lapTime);
-        const listItem = document.createElement('li');
-        listItem.textContent = Lap ${lapTimes.length}: ${formatTime(lapTime)};
-        lapList.prepend(listItem); // Add new lap at the top
+        lapCounter++;
+        const lapTime = document.createElement('li');
+        lapTime.innerHTML = `<span>Lap ${lapCounter}:</span> ${display.innerHTML}`; // Use current displayed time
+        lapList.prepend(lapTime); // Add to the top of the list
     }
 }
 
-// Event Listeners
-startButton.addEventListener('click', startStopwatch);
-pauseButton.addEventListener('click', pauseStopwatch);
-resetButton.addEventListener('click', resetStopwatch);
-lapButton.addEventListener('click', recordLap);
+function resetStopwatch() {
+    clearInterval(tInterval);
+    difference = 0;
+    running = false;
+    display.innerHTML = '00:00:00';
+    startPauseBtn.innerHTML = 'Start';
+    startPauseBtn.classList.remove('pause');
+    startPauseBtn.classList.add('start');
+    lapBtn.disabled = true;
+    resetBtn.disabled = true;
+    lapList.innerHTML = ''; // Clear lap times
+    lapCounter = 0;
+}
 
-// Initial state
-resetStopwatch();
 
