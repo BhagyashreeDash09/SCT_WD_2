@@ -1,29 +1,51 @@
-let timer;
-let running = false;
-let startTime;
-let elapsedTime = 0;
-let lapTimes = [];
+let [hours, minutes, seconds] = [0, 0, 0];
+let display = document.getElementById("display");
+let timer = null;
 
-const display = document.getElementById('display');
-const startButton = document.getElementById('startButton');
-const pauseButton = document.getElementById('pauseButton');
-const resetButton = document.getElementById('resetButton');
-const lapButton = document.getElementById('lapButton');
-const lapList = document.getElementById('lapList');
-
-function formatTime(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const milliseconds = Math.floor((ms % 1000) / 10); // Get first two digits for ms
-return (
-        String(hours).padStart(2, '0') + ':' +
-        String(minutes).padStart(2, '0') + ':' +
-        String(seconds).padStart(2, '0') /* + '.' +
-        String(milliseconds).padStart(2, '0') */ // Uncomment for milliseconds
-    );
+function updateDisplay() {
+  let h = hours < 10 ? "0" + hours : hours;
+  let m = minutes < 10 ? "0" + minutes : minutes;
+  let s = seconds < 10 ? "0" + seconds : seconds;
+  display.innerText = `${h}:${m}:${s}`;
 }
+
+function stopwatch() {
+  seconds++;
+  if (seconds === 60) {
+    seconds = 0;
+    minutes++;
+  }
+  if (minutes === 60) {
+    minutes = 0;
+    hours++;
+  }
+  updateDisplay();
+}
+
+document.getElementById("startBtn").addEventListener("click", () => {
+  if (timer !== null) return;
+  timer = setInterval(stopwatch, 1000);
+});
+
+document.getElementById("pauseBtn").addEventListener("click", () => {
+  clearInterval(timer);
+  timer = null;
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  clearInterval(timer);
+  timer = null;
+  [hours, minutes, seconds] = [0, 0, 0];
+  updateDisplay();
+  document.getElementById("laps").innerHTML = "";
+});
+
+document.getElementById("lapBtn").addEventListener("click", () => {
+  const lapTime = display.innerText;
+  const li = document.createElement("li");
+  li.innerText = `Lap: ${lapTime}`;
+  document.getElementById("laps").appendChild(li);
+});
 
 function startStopwatch() {
     if (!running) {
